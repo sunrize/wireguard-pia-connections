@@ -94,7 +94,7 @@ export pubKey
 echo Trying to connect to the PIA WireGuard API on $WG_SERVER_IP...
 wireguard_json="$(curl -s -G \
   --connect-to "$WG_HOSTNAME::$WG_SERVER_IP:" \
-  --cacert "ca.rsa.4096.crt" \
+  --cacert "/config/ca.rsa.4096.crt" \
   --data-urlencode "pt=${PIA_TOKEN}" \
   --data-urlencode "pubkey=$pubKey" \
   "https://${WG_HOSTNAME}:1337/addKey" )"
@@ -128,7 +128,7 @@ if [ "$PIA_DNS" == true ]; then
   echo
   dnsSettingForVPN="DNS = $dnsServer"
 fi
-echo -n "Trying to write /etc/wireguard/pia.conf..."
+echo -n "Trying to write /config/pia.conf..."
 mkdir -p /etc/wireguard
 echo "
 [Interface]
@@ -140,7 +140,7 @@ PersistentKeepalive = 25
 PublicKey = $(echo "$wireguard_json" | jq -r '.server_key')
 AllowedIPs = 0.0.0.0/0
 Endpoint = ${WG_SERVER_IP}:$(echo "$wireguard_json" | jq -r '.server_port')
-" > /etc/wireguard/pia.conf || exit 1
+" > /config/pia.conf || exit 1
 echo -e ${GREEN}OK!${NC}
 
 # Start the WireGuard interface.
@@ -166,10 +166,10 @@ if [ "$PIA_PF" != true ]; then
   echo -e $ ${GREEN}PIA_TOKEN=$PIA_TOKEN \
     PF_GATEWAY=$WG_SERVER_IP \
     PF_HOSTNAME=$WG_HOSTNAME \
-    ./port_forwarding.sh${NC}
+    /usr/local/sbin/port_forwarding.sh${NC}
   echo
   echo The location used must be port forwarding enabled, or this will fail.
-  echo Calling the ./get_region script with PIA_PF=true will provide a filtered list.
+  echo Calling the /usr/local/sbin/get_region script with PIA_PF=true will provide a filtered list.
   exit 1
 fi
 
@@ -187,9 +187,9 @@ echo -e "Starting procedure to enable port forwarding by running the following c
 $ ${GREEN}PIA_TOKEN=$PIA_TOKEN \\
   PF_GATEWAY=$WG_SERVER_IP \\
   PF_HOSTNAME=$WG_HOSTNAME \\
-  ./port_forwarding.sh${NC}"
+  /usr/local/sbin/port_forwarding.sh${NC}"
 
 PIA_TOKEN=$PIA_TOKEN \
   PF_GATEWAY=$WG_SERVER_IP \
   PF_HOSTNAME=$WG_HOSTNAME \
-  ./port_forwarding.sh
+  /usr/local/sbin/port_forwarding.sh

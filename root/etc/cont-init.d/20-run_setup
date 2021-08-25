@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 # Copyright (C) 2020 Private Internet Access, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -18,6 +18,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+if [ ! -f /config/ca.rsa.4096.crt ]; then
+    cp /defaults/ca.rsa.4096.crt /config/ca.rsa.4096.crt
+fi
 
 # Check if terminal allows output, if yes, define colors for output
 if test -t 1; then
@@ -98,7 +102,7 @@ while :; do
   export PIA_PASS
 
   # Confirm credentials and generate token
-  ./get_token.sh
+  /usr/local/sbin/get_token.sh
 
   tokenLocation="/opt/piavpn-manual/token"
   # If the script failed to generate an authentication token, the script will exit early.
@@ -133,30 +137,30 @@ export PIA_PF
 echo -e ${GREEN}PIA_PF=$PIA_PF${NC}
 echo
 
-# Check for in-line definition of DISABLE_IPV6 and prompt for input
-if [[ ! $DISABLE_IPV6 || $DISABLE_IPV6 = "" ]]; then
-  echo "Having active IPv6 connections might compromise security by allowing"
-  echo "split tunnel connections that run outside the VPN tunnel."
-  echo -n "Do you want to disable IPv6? (Y/n): "
-  read DISABLE_IPV6
-  echo
-fi
+# # Check for in-line definition of DISABLE_IPV6 and prompt for input
+# if [[ ! $DISABLE_IPV6 || $DISABLE_IPV6 = "" ]]; then
+#   echo "Having active IPv6 connections might compromise security by allowing"
+#   echo "split tunnel connections that run outside the VPN tunnel."
+#   echo -n "Do you want to disable IPv6? (Y/n): "
+#   read DISABLE_IPV6
+#   echo
+# fi
 
-if echo ${DISABLE_IPV6:0:1} | grep -iq n; then
-  echo -e ${RED}"IPv6 settings have not been altered.
-  "${NC}
-else
-  echo -e "The variable ${GREEN}DISABLE_IPV6=$DISABLE_IPV6${NC}, does not start with 'n' for 'no'.
-${GREEN}Defaulting to yes.${NC}
-"
-  sysctl -w net.ipv6.conf.all.disable_ipv6=1
-  sysctl -w net.ipv6.conf.default.disable_ipv6=1
-  echo
-  echo -e "${RED}IPv6 has been disabled${NC}, you can ${GREEN}enable it again with: "
-  echo "sysctl -w net.ipv6.conf.all.disable_ipv6=0"
-  echo "sysctl -w net.ipv6.conf.default.disable_ipv6=0"
-  echo -e ${NC}
-fi
+# if echo ${DISABLE_IPV6:0:1} | grep -iq n; then
+#   echo -e ${RED}"IPv6 settings have not been altered.
+#   "${NC}
+# else
+#   echo -e "The variable ${GREEN}DISABLE_IPV6=$DISABLE_IPV6${NC}, does not start with 'n' for 'no'.
+# ${GREEN}Defaulting to yes.${NC}
+# "
+#   sysctl -w net.ipv6.conf.all.disable_ipv6=1
+#   sysctl -w net.ipv6.conf.default.disable_ipv6=1
+#   echo
+#   echo -e "${RED}IPv6 has been disabled${NC}, you can ${GREEN}enable it again with: "
+#   echo "sysctl -w net.ipv6.conf.all.disable_ipv6=0"
+#   echo "sysctl -w net.ipv6.conf.default.disable_ipv6=0"
+#   echo -e ${NC}
+# fi
 
 # Input validation and check for conflicting declartions of AUTOCONNECT and PREFERRED_REGION
 # If both variables are set, AUTOCONNECT has superiority and PREFERRED_REGION is ignored
@@ -252,7 +256,7 @@ For example, you can try 0.2 for 200ms allowed latency.
       export PREFERRED_REGION
       VPN_PROTOCOL="no"
       export VPN_PROTOCOL
-      VPN_PROTOCOL=no ./get_region.sh
+      VPN_PROTOCOL=no /usr/local/sbin/get_region.sh
       
       if [ -s /opt/piavpn-manual/latencyList ]; then
         # Output the ordered list of servers that meet the latency specification $MAX_LATENCY
@@ -308,7 +312,7 @@ For example, you can try 0.2 for 200ms allowed latency.
     # Validate in-line declaration of PREFERRED_REGION; if invalid remove input to initiate prompts
     echo Region input is : $PREFERRED_REGION
     export PREFERRED_REGION
-    VPN_PROTOCOL=no ./get_region.sh
+    VPN_PROTOCOL=no /usr/local/sbin/get_region.sh
     if [[ $? != 1 ]]; then
       break
     fi
@@ -391,4 +395,4 @@ echo -e "${GREEN}PIA_DNS=$PIA_DNS${NC}"
 CONNECTION_READY="true"
 export CONNECTION_READY
 
-./get_region.sh
+/usr/local/sbin/get_region.sh
