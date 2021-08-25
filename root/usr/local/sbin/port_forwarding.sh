@@ -29,6 +29,12 @@ function check_tool() {
     exit 1
   fi
 }
+
+. /config/pf.sh
+if [ -f /config/pf_ps.json ]; then
+  PAYLOAD_AND_SIGNATURE=$(jq '.' /config/pf_ps.json)
+fi
+
 # Now we call the function to make sure we can use wg-quick, curl and jq.
 check_tool curl
 check_tool jq
@@ -89,6 +95,13 @@ if [[ ! $PAYLOAD_AND_SIGNATURE ]]; then
     --cacert "/config/ca.rsa.4096.crt" \
     -G --data-urlencode "token=${PIA_TOKEN}" \
     "https://${PF_HOSTNAME}:19999/getSignature")"
+
+  if [ -f /config/pf_ps.json ]; then
+    echo "" >> /config/pf_ps.json.log
+    cat /config/pf_ps.json >> /config/pf_ps.json.log
+  fi
+
+  echo "$payload_and_signature" | jq '.' > /config/pf_ps.json
 else
   payload_and_signature="$PAYLOAD_AND_SIGNATURE"
   echo -n "Checking the payload_and_signature from the env var... "
@@ -118,6 +131,11 @@ port="$(echo "$payload" | base64 -d | jq -r '.port')"
 # 2 months is not enough for your setup, please open a ticket.
 expires_at="$(echo "$payload" | base64 -d | jq -r '.expires_at')"
 
+echo -e '#!/bin/bash\n' > /config/pia_pf_port.sh
+echo export PIA_PF_PORT=$port >> /config/pia_pf_port.sh
+echo export PIA_PF_EXPIRES_AT=$expires_at >> /config/pia_pf_port.sh
+echo export PIA_PF_BIND=true >> /config/pia_pf_port.sh
+
 echo -ne "
 Signature ${GREEN}$signature${NC}
 Payload   ${GREEN}$payload${NC}
@@ -144,6 +162,7 @@ while true; do
     export bind_port_response
     if [ "$(echo "$bind_port_response" | jq -r '.status')" != "OK" ]; then
       echo -e "${RED}The API did not return OK when trying to bind port... Exiting."
+      echo export PIA_PF_BIND=false >> /config/pia_pf_port.sh
       exit 1
     fi
     echo -e Forwarded port'\t'${GREEN}$port${NC}

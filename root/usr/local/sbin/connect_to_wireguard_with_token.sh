@@ -144,8 +144,14 @@ Endpoint = ${WG_SERVER_IP}:$(echo "$wireguard_json" | jq -r '.server_port')
 
 echo -e ${GREEN}OK!${NC}
 
-export PIA_TOKEN
-export PF_GATEWAY
-export PF_HOSTNAME
+if [ -f /config/pf.sh ]; then
+  echo "" >> /config/pf.sh.log
+  cat /config/pf.sh >> /config/pf.sh.log
+fi
+
+echo -e '#!/bin/bash\n' > /config/pf.sh
+echo export PIA_TOKEN=$PIA_TOKEN >> /config/pf.sh
+echo export PF_GATEWAY=$WG_SERVER_IP >> /config/pf.sh
+echo export PF_HOSTNAME=$WG_HOSTNAME >> /config/pf.sh
 
 exit 0
