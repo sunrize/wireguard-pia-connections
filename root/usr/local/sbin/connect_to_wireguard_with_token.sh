@@ -128,7 +128,7 @@ if [ "$PIA_DNS" == true ]; then
   echo
   dnsSettingForVPN="DNS = $dnsServer"
 fi
-echo -n "Trying to write /config/pia.conf..."
+echo -n "Trying to write /config/wg0.conf..."
 mkdir -p /etc/wireguard
 echo "
 [Interface]
@@ -140,59 +140,12 @@ PersistentKeepalive = 25
 PublicKey = $(echo "$wireguard_json" | jq -r '.server_key')
 AllowedIPs = 0.0.0.0/0
 Endpoint = ${WG_SERVER_IP}:$(echo "$wireguard_json" | jq -r '.server_port')
-" > /config/pia.conf || exit 1
-
-ln -s /config/pia.conf /etc/wireguard/pia.conf
+" > /config/wg0.conf || exit 1
 
 echo -e ${GREEN}OK!${NC}
 
-# Start the WireGuard interface.
-# If something failed, stop this script.
-# If you get DNS errors because you miss some packages,
-# just hardcode /etc/resolv.conf to "nameserver 10.0.0.242".
-echo
-echo Trying to create the wireguard interface...
-wg-quick up pia || exit 1
-echo
-echo -e "${GREEN}The WireGuard interface got created.${NC}
+export PIA_TOKEN
+export PF_GATEWAY
+export PF_HOSTNAME
 
-At this point, internet should work via VPN.
-
-To disconnect the VPN, run:
-
---> ${GREEN}wg-quick down pia${NC} <--
-"
-
-# This section will stop the script if PIA_PF is not set to "true".
-if [ "$PIA_PF" != true ]; then
-  echo If you want to also enable port forwarding, you can start the script:
-  echo -e $ ${GREEN}PIA_TOKEN=$PIA_TOKEN \
-    PF_GATEWAY=$WG_SERVER_IP \
-    PF_HOSTNAME=$WG_HOSTNAME \
-    . /usr/local/sbin/port_forwarding.sh${NC}
-  echo
-  echo The location used must be port forwarding enabled, or this will fail.
-  echo Calling the . /usr/local/sbin/get_region script with PIA_PF=true will provide a filtered list.
-  exit 1
-fi
-
-echo -ne "This script got started with ${GREEN}PIA_PF=true${NC}.
-
-Starting port forwarding in "
-for i in {5..1}; do
-  echo -n "$i..."
-  sleep 1
-done
-echo
-echo
-
-echo -e "Starting procedure to enable port forwarding by running the following command:
-$ ${GREEN}PIA_TOKEN=$PIA_TOKEN \\
-  PF_GATEWAY=$WG_SERVER_IP \\
-  PF_HOSTNAME=$WG_HOSTNAME \\
-  . /usr/local/sbin/port_forwarding.sh${NC}"
-
-PIA_TOKEN=$PIA_TOKEN \
-  PF_GATEWAY=$WG_SERVER_IP \
-  PF_HOSTNAME=$WG_HOSTNAME \
-  . /usr/local/sbin/port_forwarding.sh
+exit 0
