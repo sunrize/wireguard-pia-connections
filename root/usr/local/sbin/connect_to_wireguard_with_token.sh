@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 # Copyright (C) 2020 Private Internet Access, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -141,6 +141,9 @@ PublicKey = $(echo "$wireguard_json" | jq -r '.server_key')
 AllowedIPs = 0.0.0.0/0
 Endpoint = ${WG_SERVER_IP}:$(echo "$wireguard_json" | jq -r '.server_port')
 " > /config/pia.conf || exit 1
+
+ln -s /config/pia.conf /etc/wireguard/pia.conf
+
 echo -e ${GREEN}OK!${NC}
 
 # Start the WireGuard interface.
@@ -166,10 +169,10 @@ if [ "$PIA_PF" != true ]; then
   echo -e $ ${GREEN}PIA_TOKEN=$PIA_TOKEN \
     PF_GATEWAY=$WG_SERVER_IP \
     PF_HOSTNAME=$WG_HOSTNAME \
-    /usr/local/sbin/port_forwarding.sh${NC}
+    . /usr/local/sbin/port_forwarding.sh${NC}
   echo
   echo The location used must be port forwarding enabled, or this will fail.
-  echo Calling the /usr/local/sbin/get_region script with PIA_PF=true will provide a filtered list.
+  echo Calling the . /usr/local/sbin/get_region script with PIA_PF=true will provide a filtered list.
   exit 1
 fi
 
@@ -187,9 +190,9 @@ echo -e "Starting procedure to enable port forwarding by running the following c
 $ ${GREEN}PIA_TOKEN=$PIA_TOKEN \\
   PF_GATEWAY=$WG_SERVER_IP \\
   PF_HOSTNAME=$WG_HOSTNAME \\
-  /usr/local/sbin/port_forwarding.sh${NC}"
+  . /usr/local/sbin/port_forwarding.sh${NC}"
 
 PIA_TOKEN=$PIA_TOKEN \
   PF_GATEWAY=$WG_SERVER_IP \
   PF_HOSTNAME=$WG_HOSTNAME \
-  /usr/local/sbin/port_forwarding.sh
+  . /usr/local/sbin/port_forwarding.sh

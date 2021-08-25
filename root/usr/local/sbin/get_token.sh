@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 # Copyright (C) 2020 Private Internet Access, Inc.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -64,7 +64,7 @@ mkdir -p /opt/piavpn-manual
 if [[ ! $PIA_USER || ! $PIA_PASS ]]; then
   echo If you want this script to automatically get a token from the Meta
   echo service, please add the variables PIA_USER and PIA_PASS. Example:
-  echo $ PIA_USER=p0123456 PIA_PASS=xxx /usr/local/sbin/get_token.sh
+  echo $ PIA_USER=p0123456 PIA_PASS=xxx . /usr/local/sbin/get_token.sh
   exit 1
 fi
 

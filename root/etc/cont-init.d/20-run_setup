@@ -23,6 +23,11 @@ if [ ! -f /config/ca.rsa.4096.crt ]; then
     cp /defaults/ca.rsa.4096.crt /config/ca.rsa.4096.crt
 fi
 
+chmod 755 /usr/local/sbin/connect_to_wireguard_with_token.sh
+chmod 755 /usr/local/sbin/get_region.sh
+chmod 755 /usr/local/sbin/get_token.sh
+chmod 755 /usr/local/sbin/port_forwarding.sh
+
 # Check if terminal allows output, if yes, define colors for output
 if test -t 1; then
   ncolors=$(tput colors)
@@ -102,7 +107,7 @@ while :; do
   export PIA_PASS
 
   # Confirm credentials and generate token
-  /usr/local/sbin/get_token.sh
+  . /usr/local/sbin/get_token.sh
 
   tokenLocation="/opt/piavpn-manual/token"
   # If the script failed to generate an authentication token, the script will exit early.
@@ -256,7 +261,7 @@ For example, you can try 0.2 for 200ms allowed latency.
       export PREFERRED_REGION
       VPN_PROTOCOL="no"
       export VPN_PROTOCOL
-      VPN_PROTOCOL=no /usr/local/sbin/get_region.sh
+      VPN_PROTOCOL=no . /usr/local/sbin/get_region.sh
       
       if [ -s /opt/piavpn-manual/latencyList ]; then
         # Output the ordered list of servers that meet the latency specification $MAX_LATENCY
@@ -312,7 +317,7 @@ For example, you can try 0.2 for 200ms allowed latency.
     # Validate in-line declaration of PREFERRED_REGION; if invalid remove input to initiate prompts
     echo Region input is : $PREFERRED_REGION
     export PREFERRED_REGION
-    VPN_PROTOCOL=no /usr/local/sbin/get_region.sh
+    VPN_PROTOCOL=no . /usr/local/sbin/get_region.sh
     if [[ $? != 1 ]]; then
       break
     fi
@@ -395,4 +400,4 @@ echo -e "${GREEN}PIA_DNS=$PIA_DNS${NC}"
 CONNECTION_READY="true"
 export CONNECTION_READY
 
-/usr/local/sbin/get_region.sh
+. /usr/local/sbin/get_region.sh
