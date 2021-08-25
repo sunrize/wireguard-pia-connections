@@ -3,7 +3,7 @@ name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
 env:
-  ENDPOINT: "user/endpoint"
+  ENDPOINT: "sunrize/wireguard-pia-connections"
   BRANCH: "master"
 
 jobs:
