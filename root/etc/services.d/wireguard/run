@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv bash
+
+_term() {
+  echo "Caught SIGTERM signal!"
+  wg-quick down wg0
+}
+
+trap _term SIGTERM
+
+wg-quick up wg0
+
+# This section will stop the script if PIA_PF is not set to "true".
+if [ "$PIA_PF" = true ]; then
+  echo -ne "Starting port forwarding in "
+  for i in {5..1}; do
+    echo -n "$i..."
+    sleep 1
+  done
+  echo
+  echo
+    . /usr/local/sbin/port_forwarding.sh
+fi
+
+sleep infinity &
+
+wait
