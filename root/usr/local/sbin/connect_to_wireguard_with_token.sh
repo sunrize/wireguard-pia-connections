@@ -130,7 +130,7 @@ if [ "$PIA_DNS" == true ]; then
 fi
 
 if [ "$PIA_DNS" == false ]; then
-  dnsServer="$PREFERRED_DNS"
+  dnsServer=$PREFERRED_DNS
   dnsSettingForVPN="DNS = $dnsServer"
 fi
 
