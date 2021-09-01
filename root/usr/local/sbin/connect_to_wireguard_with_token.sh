@@ -128,6 +128,12 @@ if [ "$PIA_DNS" == true ]; then
   echo
   dnsSettingForVPN="DNS = $dnsServer"
 fi
+
+if [ "$PIA_DNS" == false ]; then
+  dnsServer="$PREFERRED_DNS"
+  dnsSettingForVPN="DNS = $dnsServer"
+fi
+
 echo -n "Trying to write /config/wg0.conf..."
 mkdir -p /etc/wireguard
 echo "
